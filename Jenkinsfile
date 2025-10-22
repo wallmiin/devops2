@@ -42,7 +42,7 @@ pipeline {
         sh """
           docker build \
             -t docker.io/${DOCKER_USER}/${FRONTEND_IMAGE}:latest \
-            -f frontend/Dockerfile .
+            frontend/
         """
       }
     }
