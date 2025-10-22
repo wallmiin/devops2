@@ -26,7 +26,8 @@ COPY --from=build /app/build /usr/share/nginx/html
 
 # Copy nginx configuration
 # COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY frontend/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+
 
 
 # Expose port
