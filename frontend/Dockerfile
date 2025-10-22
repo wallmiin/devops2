@@ -5,7 +5,9 @@ FROM node:18-alpine as build
 WORKDIR /app
 
 # Copy package files
-COPY package*.json ./
+# COPY package*.json ./
+COPY frontend/package*.json ./
+
 
 # Install dependencies
 RUN npm ci --only=production
