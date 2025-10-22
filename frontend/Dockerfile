@@ -6,7 +6,8 @@ WORKDIR /app
 
 # Copy package files
 # COPY package*.json ./
-COPY frontend/package*.json ./
+COPY package*.json ./
+
 
 
 # Install dependencies
