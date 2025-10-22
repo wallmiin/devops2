@@ -32,7 +32,7 @@ pipeline {
         sh """
           docker build \
             -t docker.io/${DOCKER_USER}/${BACKEND_IMAGE}:latest \
-            -f backend/Dockerfile.backend .
+            -f Dockerfile.backend .
         """
       }
     }
