@@ -1,13 +1,13 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database (chạy bằng Docker, KHÔNG phải RDS)
+  # PostgreSQL Database
   db:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: ecommerce-db-ops
+      POSTGRES_DB: ecommerce_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: 123456    # <<< password của Postgres trong container
+      POSTGRES_PASSWORD: 123456   # pass DB container
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -17,37 +17,31 @@ services:
 
   # Django Backend
   backend:
-    image: docker.io/nguyet2004/backend:latest
+    image: nguyet2004/backend:latest
     environment:
-      DEBUG: 0
-      SECRET_KEY: dummy-secret-key-change-later
-      DATABASE_URL: postgresql://postgres:123456@db:5432/ecommerce-db-ops
-      #           user     pass   host port  db-name  (match với db ở trên)
-    volumes:
-      - ./media:/app/media
-      - ./staticfiles:/app/staticfiles
-    ports:
-      - "8000:8000"
+      - DEBUG=0
+      - DATABASE_URL=postgresql://postgres:123456@db:5432/ecommerce_db
     depends_on:
       - db
     networks:
       - ecommerce-network
+    ports:
+      - "8000:8000"
     command: >
       sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
              gunicorn --bind 0.0.0.0:8000 backend.wsgi:application"
 
-  # React Frontend
+  # React Frontend (Nginx)
   frontend:
-    image: docker.io/nguyet2004/frontend:latest
-    ports:
-      - "3000:80"
+    image: nguyet2004/frontend:latest
     depends_on:
       - backend
+    ports:
+      - "3000:80"
     networks:
       - ecommerce-network
 
-  # Redis for caching (optional)
+  # Redis cache
   redis:
     image: redis:7-alpine
     ports:
