@@ -1,13 +1,40 @@
 version: '3.8'
 
 services:
-  # PostgreSQL Database
+
+  backend:
+    image: nguyet2004/backend:latest
+    container_name: backend
+    restart: always
+    ports:
+      - "8000:8000"
+    env_file:
+      - backend/.env
+    depends_on:
+      - db
+      - redis
+    networks:
+      - ecommerce-network
+
+  frontend:
+    image: nguyet2004/frontend:latest
+    container_name: frontend
+    restart: always
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - ecommerce-network
+
   db:
     image: postgres:15-alpine
+    container_name: db
+    restart: always
     environment:
-      POSTGRES_DB: ecommerce_db
+      POSTGRES_DB: ecommerce-db-ops
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: nguyet1906
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -15,43 +42,10 @@ services:
     networks:
       - ecommerce-network
 
-  # Django Backend
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    environment:
-      - DEBUG=0
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/ecommerce_db
-    volumes:
-      - ./media:/app/media
-      - ./staticfiles:/app/staticfiles
-    ports:
-      - "8000:8000"
-    depends_on:
-      - db
-    networks:
-      - ecommerce-network
-    command: >
-      sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn --bind 0.0.0.0:8000 backend.wsgi:application"
-
-  # React Frontend
-  frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"
-    depends_on:
-      - backend
-    networks:
-      - ecommerce-network
-
-  # Redis for caching (optional)
   redis:
     image: redis:7-alpine
+    container_name: redis
+    restart: always
     ports:
       - "6379:6379"
     networks:
