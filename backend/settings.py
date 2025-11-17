@@ -1,7 +1,10 @@
 # Database configuration
 from pathlib import Path
 import os
-BASE_DIR = Path(__file__).resolve().parent.parents
+
+# BASE_DIR phải là Path, không phải _PathParents
+BASE_DIR = Path(__file__).resolve().parent.parent
+
 if os.environ.get('EC2_PRODUCTION'):   # when running on EC2
     DATABASES = {
         'default': {
