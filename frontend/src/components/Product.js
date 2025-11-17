@@ -10,28 +10,42 @@ import { Link } from "react-router-dom";
 import Rating from "./Rating";
 
 function Product({ product }) {
+  const titleClampStyle = {
+    display: "-webkit-box",
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: "vertical",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  };
+
   return (
-    <Card className="my-3 p-3 rounded">
-      <Link to={`/product/${product._id}`}>
-        <Card.Img src={product.image} />
+    <Card className="my-3 p-3 rounded d-flex flex-column h-100">
+      <Link to={`/product/${product._id}`} className="text-center">
+        <div className="product-image-container">
+          <img className="product-image" src={product.image} alt={product.name} />
+        </div>
       </Link>
 
-      <Card.Body>
+      <Card.Body className="d-flex flex-column flex-grow-1">
         <Link to={`/product/${product._id}`}>
-          <Card.Title as="div">
+          <Card.Title as="div" style={titleClampStyle}>
             <strong>{product.name}</strong>
           </Card.Title>
         </Link>
 
-        <Card.Text as="div">
-          <Rating
-            value={product.rating}
-            text={`${product.numReviews} reviews`}
-            color={"#f8e825"}
-          />
-        </Card.Text>
+        <div className="mt-auto d-flex justify-content-between align-items-center">
+          <div>
+            <Rating
+              value={product.rating}
+              text={`${product.numReviews} reviews`}
+              color={"#f8e825"}
+            />
+          </div>
 
-        <Card.Text as="h3">₹{product.price}</Card.Text>
+          <div>
+            <Card.Text as="h3" className="mb-0">₹{product.price}</Card.Text>
+          </div>
+        </div>
       </Card.Body>
     </Card>
   );
