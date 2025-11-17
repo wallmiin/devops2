@@ -29,53 +29,54 @@ pipeline {
 
     stage('Build Backend Docker') {
       steps {
-        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-          sh """
-            docker build \
-              -t docker.io/${DOCKER_USER}/${BACKEND_IMAGE}:latest \
-              -f Dockerfile.backend .
-          """
-        }
+        sh """
+          docker build \
+            -t docker.io/${DOCKER_USER}/${BACKEND_IMAGE}:latest \
+            -f Dockerfile.backend .
+        """
       }
     }
 
     stage('Build Frontend Docker') {
       steps {
-        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-          sh """
-            docker build \
-              -t docker.io/${DOCKER_USER}/${FRONTEND_IMAGE}:latest \
-              frontend/
-          """
-        }
+        sh """
+          docker build \
+            -t docker.io/${DOCKER_USER}/${FRONTEND_IMAGE}:latest \
+            frontend/
+        """
       }
     }
 
     stage('Push to Docker Hub') {
       steps {
-        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-          withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-            sh """
-              echo \$PASS | docker login -u \$USER --password-stdin
-              docker push docker.io/${DOCKER_USER}/${BACKEND_IMAGE}:latest
-              docker push docker.io/${DOCKER_USER}/${FRONTEND_IMAGE}:latest
-            """
-          }
+        withCredentials([usernamePassword(credentialsId: 'dockerhub-cred', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+          sh """
+            echo \$PASS | docker login -u \$USER --password-stdin
+            docker push docker.io/${DOCKER_USER}/${BACKEND_IMAGE}:latest
+            docker push docker.io/${DOCKER_USER}/${FRONTEND_IMAGE}:latest
+          """
         }
       }
     }
 
+    // 🔥 ADD THIS ───────────────────────────────
+    stage('Prepare Deploy Files') {
+      steps {
+        sh """
+          cp ${WORKSPACE}/docker-compose.yml ${DEPLOY_DIR}/docker-compose.yml
+        """
+      }
+    }
+    // ───────────────────────────────────────────
+
     stage('Deploy (same host)') {
       steps {
-        wrap([$class: 'AnsiColorBuildWrapper', 'colorMapName': 'xterm']) {
-          sh """
-            mkdir -p ${DEPLOY_DIR}
-            cd ${DEPLOY_DIR}
-            docker compose pull
-            docker compose up -d
-            docker image prune -f
-          """
-        }
+        sh """
+          cd ${DEPLOY_DIR}
+          docker compose pull
+          docker compose up -d
+          docker image prune -f
+        """
       }
     }
 
