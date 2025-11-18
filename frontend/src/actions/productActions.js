@@ -1,5 +1,5 @@
-/* AXIOS */
-import axios from "axios";
+/* AXIOS CONFIG */
+import API from "../axiosConfig";
 
 /* ACTION TYPES */
 import {
@@ -13,53 +13,50 @@ import {
   PRODUCT_DELETE_SUCCESS,
   PRODUCT_DELETE_FAIL,
   PRODUCT_CREATE_REQUEST,
-  PRODUCT_CREATE_FAIL,
   PRODUCT_CREATE_SUCCESS,
+  PRODUCT_CREATE_FAIL,
   PRODUCT_UPDATE_REQUEST,
   PRODUCT_UPDATE_SUCCESS,
   PRODUCT_UPDATE_FAIL,
   PRODUCT_CREATE_REVIEW_REQUEST,
   PRODUCT_CREATE_REVIEW_SUCCESS,
   PRODUCT_CREATE_REVIEW_FAIL,
+  PRODUCT_TOP_REQUEST,
   PRODUCT_TOP_SUCCESS,
   PRODUCT_TOP_FAIL,
-  PRODUCT_TOP_REQUEST,
 } from "../constants/productConstants";
 
-/* ACTION CREATOR USED IN HomeScreen COMPONENT */
-export const listProducts =
-  (keyword = "") =>
-  async (dispatch) => {
-    try {
-      dispatch({
-        type: PRODUCT_LIST_REQUEST,
-      });
 
-      const { data } = await axios.get(`/api/products${keyword}`);
+// ===============================================
+// 🔥 LIST PRODUCTS
+// ===============================================
+export const listProducts = (keyword = "") => async (dispatch) => {
+  try {
+    dispatch({ type: PRODUCT_LIST_REQUEST });
 
-      dispatch({
-        type: PRODUCT_LIST_SUCCESS,
-        payload: data,
-      });
-    } catch (error) {
-      dispatch({
-        type: PRODUCT_LIST_FAIL,
-        payload:
-          error.response && error.response.data.detail
-            ? error.response.data.detail
-            : error.message,
-      });
-    }
-  };
+    const { data } = await API.get(`/api/products${keyword}`);
 
-/* ACTION CREATOR USED IN ProductScreen COMPONENT */
+    dispatch({
+      type: PRODUCT_LIST_SUCCESS,
+      payload: data,
+    });
+  } catch (error) {
+    dispatch({
+      type: PRODUCT_LIST_FAIL,
+      payload: error.response?.data?.detail || error.message,
+    });
+  }
+};
+
+
+// ===============================================
+// 🔥 PRODUCT DETAILS
+// ===============================================
 export const listProductDetails = (id) => async (dispatch) => {
   try {
-    dispatch({
-      type: PRODUCT_DETAILS_REQUEST,
-    });
+    dispatch({ type: PRODUCT_DETAILS_REQUEST });
 
-    const { data } = await axios.get(`/api/products/${id}`);
+    const { data } = await API.get(`/api/products/${id}/`);
 
     dispatch({
       type: PRODUCT_DETAILS_SUCCESS,
@@ -68,75 +65,62 @@ export const listProductDetails = (id) => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: PRODUCT_DETAILS_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
+      payload: error.response?.data?.detail || error.message,
     });
   }
 };
 
-/* ACTION CREATOR USED IN DELETING PRODUCTS IN ProductListScreen COMPONENT */
+
+// ===============================================
+// 🔥 DELETE PRODUCT (ADMIN)
+// ===============================================
 export const deleteProduct = (id) => async (dispatch, getState) => {
   try {
-    dispatch({
-      type: PRODUCT_DELETE_REQUEST,
-    });
+    dispatch({ type: PRODUCT_DELETE_REQUEST });
 
-    // PULLING OUT THE CURRENT USER WE ARE LOGGED IN AS
     const {
       userLogin: { userInfo },
     } = getState();
 
     const config = {
       headers: {
-        "Content-type": "application/json",
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
 
-    /* MAKING API CALL TO DELETE PRODUCT */
-    // eslint-disable-next-line
-    const { data } = await axios.delete(`/api/products/delete/${id}/`, config);
+    await API.delete(`/api/products/delete/${id}/`, config);
 
-    /* IF GET REQUEST SUCCESSFULL WE DISPATCH & SEND THE PAYLOAD TO OUR REDUCER */
     dispatch({
       type: PRODUCT_DELETE_SUCCESS,
     });
   } catch (error) {
     dispatch({
       type: PRODUCT_DELETE_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
+      payload: error.response?.data?.detail || error.message,
     });
   }
 };
 
-/* ACTION CREATOR USED IN CREATING PRODUCTS IN ProductListScreen COMPONENT */
+
+// ===============================================
+// 🔥 CREATE PRODUCT (ADMIN)
+// ===============================================
 export const createProduct = () => async (dispatch, getState) => {
   try {
-    dispatch({
-      type: PRODUCT_CREATE_REQUEST,
-    });
+    dispatch({ type: PRODUCT_CREATE_REQUEST });
 
-    // PULLING OUT THE CURRENT USER WE ARE LOGGED IN AS
     const {
       userLogin: { userInfo },
     } = getState();
 
     const config = {
       headers: {
-        "Content-type": "application/json",
         Authorization: `Bearer ${userInfo.token}`,
       },
     };
 
-    /* MAKING API CALL TO CREATE PRODUCT */
-    const { data } = await axios.post(`/api/products/create/`, {}, config);
+    const { data } = await API.post(`/api/products/create/`, {}, config);
 
-    /* IF POST REQUEST SUCCESSFULL WE DISPATCH & SEND THE PAYLOAD TO OUR REDUCER */
     dispatch({
       type: PRODUCT_CREATE_SUCCESS,
       payload: data,
@@ -144,22 +128,19 @@ export const createProduct = () => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: PRODUCT_CREATE_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
+      payload: error.response?.data?.detail || error.message,
     });
   }
 };
 
-/* ACTION CREATOR USED IN UPDATING PRODUCTS IN ProductEditScreen COMPONENT */
+
+// ===============================================
+// 🔥 UPDATE PRODUCT (ADMIN)
+// ===============================================
 export const updateProduct = (product) => async (dispatch, getState) => {
   try {
-    dispatch({
-      type: PRODUCT_UPDATE_REQUEST,
-    });
+    dispatch({ type: PRODUCT_UPDATE_REQUEST });
 
-    // PULLING OUT THE CURRENT USER WE ARE LOGGED IN AS
     const {
       userLogin: { userInfo },
     } = getState();
@@ -171,20 +152,17 @@ export const updateProduct = (product) => async (dispatch, getState) => {
       },
     };
 
-    /* MAKING API CALL TO UPDATE PRODUCT */
-    const { data } = await axios.put(
+    const { data } = await API.put(
       `/api/products/update/${product._id}/`,
       product,
       config
     );
 
-    /* IF PUT REQUEST SUCCESSFULL WE DISPATCH & SEND THE PAYLOAD TO OUR REDUCER */
     dispatch({
       type: PRODUCT_UPDATE_SUCCESS,
       payload: data,
     });
 
-    /* LOAD IN THE UPDATED PRODUCTS DETAILS */
     dispatch({
       type: PRODUCT_DETAILS_SUCCESS,
       payload: data,
@@ -192,65 +170,53 @@ export const updateProduct = (product) => async (dispatch, getState) => {
   } catch (error) {
     dispatch({
       type: PRODUCT_UPDATE_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
+      payload: error.response?.data?.detail || error.message,
     });
   }
 };
 
-/* ACTION CREATOR USED IN CREATING PRODUCT REVIEWS IN ProductScreen COMPONENT */
-export const createProductReview =
-  (productId, review) => async (dispatch, getState) => {
-    try {
-      dispatch({
-        type: PRODUCT_CREATE_REVIEW_REQUEST,
-      });
 
-      // PULLING OUT THE CURRENT USER WE ARE LOGGED IN AS
-      const {
-        userLogin: { userInfo },
-      } = getState();
+// ===============================================
+// 🔥 CREATE PRODUCT REVIEW
+// ===============================================
+export const createProductReview = (productId, review) => async (
+  dispatch,
+  getState
+) => {
+  try {
+    dispatch({ type: PRODUCT_CREATE_REVIEW_REQUEST });
 
-      const config = {
-        headers: {
-          "Content-type": "application/json",
-          Authorization: `Bearer ${userInfo.token}`,
-        },
-      };
+    const {
+      userLogin: { userInfo },
+    } = getState();
 
-      /* MAKING API CALL TO CREATE PRODUCT REVIEW */
-      const { data } = await axios.post(
-        `/api/products/${productId}/reviews/`,
-        review,
-        config
-      );
+    const config = {
+      headers: {
+        "Content-type": "application/json",
+        Authorization: `Bearer ${userInfo.token}`,
+      },
+    };
 
-      /* IF POST REQUEST SUCCESSFULL WE DISPATCH & SEND THE PAYLOAD TO OUR REDUCER */
-      dispatch({
-        type: PRODUCT_CREATE_REVIEW_SUCCESS,
-        payload: data,
-      });
-    } catch (error) {
-      dispatch({
-        type: PRODUCT_CREATE_REVIEW_FAIL,
-        payload:
-          error.response && error.response.data.detail
-            ? error.response.data.detail
-            : error.message,
-      });
-    }
-  };
+    await API.post(`/api/products/${productId}/reviews/`, review, config);
 
-/* ACTION CREATOR USED IN ProductCarousel COMPONENT */
+    dispatch({ type: PRODUCT_CREATE_REVIEW_SUCCESS });
+  } catch (error) {
+    dispatch({
+      type: PRODUCT_CREATE_REVIEW_FAIL,
+      payload: error.response?.data?.detail || error.message,
+    });
+  }
+};
+
+
+// ===============================================
+// 🔥 TOP PRODUCTS
+// ===============================================
 export const listTopProducts = () => async (dispatch) => {
   try {
-    dispatch({
-      type: PRODUCT_TOP_REQUEST,
-    });
+    dispatch({ type: PRODUCT_TOP_REQUEST });
 
-    const { data } = await axios.get(`/api/products/top/`);
+    const { data } = await API.get(`/api/products/top/`);
 
     dispatch({
       type: PRODUCT_TOP_SUCCESS,
@@ -259,10 +225,7 @@ export const listTopProducts = () => async (dispatch) => {
   } catch (error) {
     dispatch({
       type: PRODUCT_TOP_FAIL,
-      payload:
-        error.response && error.response.data.detail
-          ? error.response.data.detail
-          : error.message,
+      payload: error.response?.data?.detail || error.message,
     });
   }
 };
