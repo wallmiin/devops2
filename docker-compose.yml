@@ -7,7 +7,7 @@ services:
     environment:
       POSTGRES_DB: ecommerce_db
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: 123456   # pass DB container
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -17,39 +17,31 @@ services:
 
   # Django Backend
   backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
+    image: nguyet2004/backend:latest
     environment:
       - DEBUG=0
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/ecommerce_db
-    volumes:
-      - ./media:/app/media
-      - ./staticfiles:/app/staticfiles
-    ports:
-      - "8000:8000"
+      - DATABASE_URL=postgresql://postgres:123456@db:5432/ecommerce_db
     depends_on:
       - db
     networks:
       - ecommerce-network
+    ports:
+      - "8000:8000"
     command: >
       sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
              gunicorn --bind 0.0.0.0:8000 backend.wsgi:application"
 
-  # React Frontend
+  # React Frontend (Nginx)
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile
-    ports:
-      - "3000:80"
+    image: nguyet2004/frontend:latest
     depends_on:
       - backend
+    ports:
+      - "3000:80"
     networks:
       - ecommerce-network
 
-  # Redis for caching (optional)
+  # Redis cache
   redis:
     image: redis:7-alpine
     ports:

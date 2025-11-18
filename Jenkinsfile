@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    DOCKER_USER    = "nguyet2004"   // sửa lại
+    DOCKER_USER    = "nguyet2004"
     BACKEND_IMAGE  = "backend"
     FRONTEND_IMAGE = "frontend"
     DEPLOY_DIR     = "/opt/deploy/app"
@@ -11,16 +11,16 @@ pipeline {
   options {
     skipDefaultCheckout(true)
     timestamps()
-    ansiColor('xterm')
   }
 
   stages {
+
     stage('Checkout') {
       steps {
         checkout([$class: 'GitSCM',
           branches: [[name: '*/main']],
           userRemoteConfigs: [[
-            url: 'https://github.com/wallmiin/devops2.git', // sửa lại
+            url: 'https://github.com/wallmiin/devops2.git',
             credentialsId: 'github-pat'
           ]]
         ])
@@ -59,10 +59,19 @@ pipeline {
       }
     }
 
+    // 🔥 ADD THIS ───────────────────────────────
+    stage('Prepare Deploy Files') {
+      steps {
+        sh """
+          cp ${WORKSPACE}/docker-compose.yml ${DEPLOY_DIR}/docker-compose.yml
+        """
+      }
+    }
+    // ───────────────────────────────────────────
+
     stage('Deploy (same host)') {
       steps {
         sh """
-          mkdir -p ${DEPLOY_DIR}
           cd ${DEPLOY_DIR}
           docker compose pull
           docker compose up -d
@@ -70,5 +79,6 @@ pipeline {
         """
       }
     }
+
   }
 }

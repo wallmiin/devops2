@@ -19,7 +19,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
 
-    'base',  # app product/user
+    'base',
 ]
 
 MIDDLEWARE = [
@@ -33,7 +33,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'backend.urls'   # <- QUAN TRỌNG, LỖI CỦA EM LÀ THIẾU DÒNG NÀY
+ROOT_URLCONF = 'backend.urls'
 
 TEMPLATES = [
     {
@@ -53,17 +53,14 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'backend.wsgi.application'
 
-
-# -----------------------
-# DATABASE CONFIG
-# -----------------------
+# DATABASE
 if os.environ.get('EC2_PRODUCTION') == "1":
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': 'ecommerce-db-ops',
             'USER': 'postgres',
-            'PASSWORD': 'nguyet1906',    # pass RDS
+            'PASSWORD': 'nguyet1906',
             'HOST': 'ecommerce-db-ops.corayycki8kr.us-east-1.rds.amazonaws.com',
             'PORT': '5432',
         }
@@ -76,46 +73,27 @@ else:
         }
     }
 
-
-# -----------------------
 # STATIC & MEDIA
-# -----------------------
 STATIC_URL = '/static/'
 STATIC_ROOT = '/app/staticfiles'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = '/app/media'
 
-
-# -----------------------
-# PASSWORD VALIDATION
-# -----------------------
+# PASSWORD
 AUTH_PASSWORD_VALIDATORS = [
-    {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-    },
+    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
+    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
 ]
 
-
-# -----------------------
-# INTERNATIONALIZATION
-# -----------------------
+# I18N
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
-
-# -----------------------
 # CORS
-# -----------------------
 CORS_ALLOW_ALL_ORIGINS = True
 
-
-# -----------------------
-# DEFAULT PRIMARY KEY
-# -----------------------
+# DEFAULT KEY TYPE
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
